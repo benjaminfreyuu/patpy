@@ -34,7 +34,6 @@ dependencies = [
   "scipy>=1.10",
   "seaborn>=0.12",
 ]
-
 optional-dependencies.de = [
   "pertpy[de]>=1.0.5",
 ]
@@ -140,38 +139,26 @@ doc = [
   "sphinxext-opengraph",
 ]
 
-[tool.hatch.metadata]
-allow-direct-references = true # Allow installing packages from git repositories
-
-[tool.hatch.envs.default]
-installer = "uv"
-dependency-groups = [ "dev" ]
-
-[tool.hatch.envs.docs]
-dependency-groups = [ "doc" ]
-scripts.build = "sphinx-build -M html docs docs/_build {args}"
-scripts.open = "python -m webbrowser -t docs/_build/html/index.html"
-scripts.clean = "git clean -fdX -- {args:docs}"
-
-# Test the lowest and highest supported Python versions with normal deps
-[[tool.hatch.envs.hatch-test.matrix]]
-deps = [ "stable" ]
-python = [ "3.11", "3.14" ]
-
-# Test the newest supported Python version also with pre-release deps
-[[tool.hatch.envs.hatch-test.matrix]]
-deps = [ "pre" ]
-python = [ "3.14" ]
-
-[tool.hatch.envs.hatch-test]
-dependency-groups = [ "dev", "test" ]
-
-[tool.hatch.envs.hatch-test.overrides]
+[tool.hatch]
+envs.default.installer = "uv"
+envs.default.dependency-groups = [ "dev" ]
+envs.docs.dependency-groups = [ "doc" ]
+envs.docs.scripts.build = "sphinx-build -M html docs docs/_build {args}"
+envs.docs.scripts.open = "python -m webbrowser -t docs/_build/html/index.html"
+envs.docs.scripts.clean = "git clean -fdX -- {args:docs}"
+envs.hatch-test.dependency-groups = [ "dev", "test" ]
+envs.hatch-test.matrix = [
+  # Test the lowest and highest supported Python versions with normal deps
+  { deps = [ "stable" ], python = [ "3.11", "3.14" ] },
+  # Test the newest supported Python version also with pre-release deps
+  { deps = [ "pre" ], python = [ "3.14" ] },
+]
 # If the matrix variable `deps` is set to "pre",
 # set the environment variable `UV_PRERELEASE` to "allow".
-matrix.deps.env-vars = [
+envs.hatch-test.overrides.matrix.deps.env-vars = [
   { key = "UV_PRERELEASE", value = "allow", if = [ "pre" ] },
 ]
+metadata.allow-direct-references = true  # Allow installing packages from git repositories
 
 [tool.ruff]
 line-length = 120
@@ -180,9 +167,7 @@ extend-include = [ "*.ipynb" ]
 exclude = [
   "docs/notebooks/**",
 ]
-
 format.docstring-code-format = true
-
 lint.select = [
   "B",      # flake8-bugbear
   "BLE",    # flake8-blind-except
@@ -227,12 +212,12 @@ markers = [
   "dataset: tests that download real datasets from the internet (slow, opt-in via --run-datasets)",
 ]
 
-[tool.coverage.run]
-source = [ "patpy" ]
-patch = [ "subprocess" ]
-omit = [
+[tool.coverage]
+run.omit = [
   "**/test_*.py",
 ]
+run.patch = [ "subprocess" ]
+run.source = [ "patpy" ]
 
 [tool.cruft]
 skip = [
